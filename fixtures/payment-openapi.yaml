@@ -1,0 +1,21 @@
+openapi: 3.0.3
+info:
+  title: Payment Workflow Lab API
+  version: 1.0.0
+paths:
+  /payments:
+    post:
+      operationId: createPayment
+      summary: Create a payment request
+  /payments/{payment_id}/approve:
+    post:
+      operationId: approvePayment
+      summary: Approve the current payment terms
+  /payments/{payment_id}:
+    patch:
+      operationId: editPayment
+      summary: Edit pending payment terms
+  /payments/{payment_id}/execute:
+    post:
+      operationId: executePayment
+      summary: Execute an approved payment

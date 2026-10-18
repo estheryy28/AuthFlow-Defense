@@ -1,0 +1,63 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-dev-only}
+      POSTGRES_DB: policyproof
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d policyproof"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    networks: [platform, lab]
+
+  target:
+    build: ./target
+    environment:
+      DATABASE_URL: ${TARGET_DATABASE_URL:-postgresql://policyproof_target:target-dev-only@db:5432/policyproof}
+      APP_MODE: ${APP_MODE:-vulnerable}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [lab]
+
+  api:
+    build: ./backend
+    environment:
+      API_DATABASE_URL: ${API_DATABASE_URL:-postgresql://policyproof_api:api-dev-only@db:5432/policyproof}
+      ORACLE_DATABASE_URL: ${ORACLE_DATABASE_URL:-postgresql://policyproof_oracle:oracle-dev-only@db:5432/policyproof}
+      TARGET_URL: ${TARGET_URL:-http://target:8001}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b-instruct}
+    volumes:
+      - ./fixtures:/app/fixtures:ro
+      - ./target/app:/app/target_source:ro
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      target:
+        condition: service_started
+    networks: [platform, lab]
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_BASE: http://localhost:8000
+    ports:
+      - "127.0.0.1:5173:5173"
+    depends_on: [api]
+    networks: [platform]
+
+volumes:
+  postgres_data:
+
+networks:
+  platform:
+  lab:
+    internal: true
