@@ -1,6 +1,6 @@
-# Policy-to-Proof
+# AuthFlow-Defense
 
-**Policy-to-Proof is a local cybersecurity prototype that checks whether a payment workflow settles the terms that were approved.** It connects requirements spread across a policy, API description, and application source; proposes a bounded test; runs that test against an owned vulnerable or fixed application; and verifies the outcome from PostgreSQL state.
+**AuthFlow-Defense is a local cybersecurity prototype that checks whether a payment workflow settles the terms that were approved.** It connects requirements spread across a policy, API description, and application source; proposes a bounded test; runs that test against an owned vulnerable or fixed application; and verifies the outcome from PostgreSQL state.
 
 This is a controlled lab demonstration, not a production security product or a general-purpose vulnerability scanner.
 
